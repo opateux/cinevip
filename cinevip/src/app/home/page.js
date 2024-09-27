@@ -20,20 +20,22 @@ export default function MovieForm() {
     'Infantil'
   ]); // Gêneros iniciais
 
-  // Estado para controlar a visibilidade do modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Estados para gerenciamento de filmes
+  const [movies, setMovies] = useState([]); // Lista de filmes
+  const [isMovieModalOpen, setIsMovieModalOpen] = useState(false); // Controle de visibilidade do modal de filmes
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controle de visibilidade do modal de gêneros
+  const [editingIndex, setEditingIndex] = useState(null); // Índice do filme sendo editado
 
-  // Função para abrir o modal de gerenciamento de gêneros
-  const openGenreModal = () => {
-    setIsModalOpen(true);
+  // Funções para abrir e fechar modais
+  const openGenreModal = () => setIsModalOpen(true);
+  const closeGenreModal = () => setIsModalOpen(false);
+  const openMovieModal = () => {
+    setIsMovieModalOpen(true);
+    setEditingIndex(null); // Reseta a edição
   };
+  const closeMovieModal = () => setIsMovieModalOpen(false);
 
-  // Função para fechar o modal de gerenciamento de gêneros
-  const closeGenreModal = () => {
-    setIsModalOpen(false);
-  };
-
-  // Função para adicionar um novo gênero (Create)
+  // Funções para gerenciamento de gêneros
   const addGenre = () => {
     const newGenre = prompt("Digite o novo gênero:");
     if (newGenre && !genres.includes(newGenre)) {
@@ -43,7 +45,6 @@ export default function MovieForm() {
     }
   };
 
-  // Função para atualizar um gênero existente (Update)
   const updateGenre = (oldGenre) => {
     const newGenre = prompt(`Editar gênero: ${oldGenre}`, oldGenre);
     if (newGenre && !genres.includes(newGenre)) {
@@ -53,10 +54,66 @@ export default function MovieForm() {
     }
   };
 
-  // Função para remover um gênero (Delete)
   const deleteGenre = (genreToDelete) => {
     if (window.confirm(`Tem certeza que deseja excluir o gênero "${genreToDelete}"?`)) {
       setGenres(genres.filter(g => g !== genreToDelete));
+    }
+  };
+
+  // Funções para gerenciamento de filmes
+  const addMovie = () => {
+    const newMovie = {
+      title: prompt("Digite o título do filme:"),
+      year: prompt("Digite o ano do filme:"),
+      releaseDate: prompt("Digite a data de lançamento do filme:"),
+      genre: prompt("Digite o gênero do filme:"),
+      director: prompt("Digite o nome do diretor do filme:"),
+    };
+
+    if (newMovie.title) {
+      setMovies([...movies, newMovie]);
+    }
+  };
+
+  const startEditingMovie = (index) => {
+    setEditingIndex(index);
+    const movie = movies[index];
+    setTitle(movie.title);
+    setYear(movie.year);
+    setReleaseDate(movie.releaseDate);
+    setGenre(movie.genre);
+    setDirector(movie.director);
+    openMovieModal();
+  };
+
+  const updateMovie = () => {
+    if (editingIndex !== null) {
+      const updatedMovie = {
+        title,
+        year,
+        releaseDate,
+        genre,
+        director,
+      };
+
+      const updatedMovies = [...movies];
+      updatedMovies[editingIndex] = updatedMovie;
+      setMovies(updatedMovies);
+      
+      // Limpa os campos após a edição
+      setTitle('');
+      setYear('');
+      setReleaseDate('');
+      setGenre('');
+      setDirector('');
+      setEditingIndex(null);
+      closeMovieModal();
+    }
+  };
+
+  const deleteMovie = (index) => {
+    if (window.confirm(`Tem certeza que deseja excluir o filme "${movies[index].title}"?`)) {
+      setMovies(movies.filter((_, i) => i !== index));
     }
   };
 
@@ -141,6 +198,7 @@ export default function MovieForm() {
             </select>
             <button type="button" onClick={addGenre}>+</button>
             <button type="button" onClick={openGenreModal}>Gerenciar Gêneros</button>
+            <button type="button" onClick={openMovieModal}>Gerenciar Filmes</button>
           </div>
         </div>
         <div className="form-group">
@@ -177,6 +235,27 @@ export default function MovieForm() {
           </div>
         </div>
       )}
+
+      {/* Modal de Gerenciamento de Filmes */}
+      {isMovieModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Gerenciamento de Filmes</h2>
+            <ul>
+              {movies.map((m, index) => (
+                <li key={index}>
+                  {m.title} - {m.year} 
+                  <button type="button" onClick={() => startEditingMovie(index)}>Editar</button>
+                  <button type="button" onClick={() => deleteMovie(index)}>Excluir</button>
+                </li>
+              ))}
+            </ul>
+            <button type="button" onClick={addMovie}>Adicionar Novo Filme</button>
+            <button type="button" onClick={closeMovieModal}>Fechar</button>
+          </div>
+        </div>
+      )}
+
 
       {/* CSS do componente */}
       <style jsx>{`
