@@ -7,18 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Genre {
-  id      Int      @id @default(autoincrement())
-  name    String   @unique
-  movies  Movie[]
+model Filme {
+  id         Int      @id @default(autoincrement())
+  titulo     String
+  ano        Int
+  lancamento DateTime
+  generoId   Int
+  diretor    String
+  genero     Genero   @relation(fields: [generoId], references: [id])
 }
 
-model Movie {
-  id          Int      @id @default(autoincrement())
-  title       String
-  year        Int
-  releaseDate String
-  genreId     Int
-  director    String
-  genre       Genre    @relation(fields: [genreId], references: [id])
+model Genero {
+  id    Int     @id @default(autoincrement())
+  nome  String
+  filmes Filme[]
 }
